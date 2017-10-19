@@ -1,7 +1,6 @@
 name: "caffe3DADNC"
 layers {
   name: "data"
-  #type: MULTI_TASK_3DDATA
   type: VIDEO_DATA
   top: "data"
   top: "label"
@@ -9,9 +8,7 @@ layers {
     source: "../../data/ADNC/normEachMR_train/landmk001_train.txt"
     use_image: false 
     is_color: false
-    #mean_file: "caffe3d_tumor_dti_l3_mean.binaryproto"
     batch_size: 30
-    #crop_size: 32
     use_temporal_jitter: true 
     mirror: false 
     show_data: 0
@@ -286,15 +283,7 @@ layers {
   bottom: "fc5"
   top: "fc5"
 }
-#layers {
-#  name: "drop5"
-#  type: DROPOUT
-#  bottom: "fc5"
-#  top: "fc5"
-#  dropout_param {
-#    dropout_ratio: 0.5
-#  }
-#}
+
 layers {
   name: "fc6"
   type: INNER_PRODUCT
