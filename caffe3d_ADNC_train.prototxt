@@ -1,0 +1,325 @@
+name: "caffe3DADNC"
+layers {
+  name: "data"
+  #type: MULTI_TASK_3DDATA
+  type: VIDEO_DATA
+  top: "data"
+  top: "label"
+  image_data_param {
+    source: "../../data/ADNC/normEachMR_train/landmk001_train.txt"
+    use_image: false 
+    is_color: false
+    #mean_file: "caffe3d_tumor_dti_l3_mean.binaryproto"
+    batch_size: 30
+    #crop_size: 32
+    use_temporal_jitter: true 
+    mirror: false 
+    show_data: 0
+    new_height: 19 
+    new_width: 19
+    new_length: 19
+    shuffle: true 
+  }
+}
+# ----------- 1st layer group ---------------
+layers {
+  name: "conv1a"
+  type: CONVOLUTION3D
+  bottom: "data"
+  top: "conv1a"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 32 
+    kernel_size: 3
+    kernel_depth: 3
+    pad: 1
+    temporal_pad: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+layers {
+  name: "relu1a"
+  type: RELU
+  bottom: "conv1a"
+  top: "conv1a"
+}
+layers {
+  name: "conv1b"
+  type: CONVOLUTION3D
+  bottom: "conv1a"
+  top: "conv1b"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 32 
+    kernel_size: 3
+    kernel_depth: 3
+    pad: 1
+    temporal_pad: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      #value: 0 
+    }
+  }
+}
+layers {
+  name: "relu1b"
+  type: RELU
+  bottom: "conv1b"
+  top: "conv1b"
+}
+layers {
+  name: "pool1"
+  type: POOLING3D
+  bottom: "conv1b"
+  top: "pool1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    kernel_depth: 2
+    stride: 2
+    temporal_stride: 2
+  }
+}
+# ----------------- 2nd layer group --------------
+layers {
+  name: "conv2a"
+  type: CONVOLUTION3D
+  bottom: "pool1"
+  top: "conv2a"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 64 
+    kernel_size: 3
+    kernel_depth: 3
+    pad: 1
+    temporal_pad: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+      #std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      #value: 0 
+    }
+  }
+}
+layers {
+  name: "relu2a"
+  type: RELU
+  bottom: "conv2a"
+  top: "conv2a"
+}
+
+layers {
+  name: "conv2b"
+  type: CONVOLUTION3D
+  bottom: "conv2a"
+  top: "conv2b"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 64 
+    kernel_size: 3
+    kernel_depth: 3
+    pad: 1
+    temporal_pad: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+      #std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      #value: 0 
+    }
+  }
+}
+layers {
+  name: "relu2b"
+  type: RELU
+  bottom: "conv2b"
+  top: "conv2b"
+}
+layers {
+  name: "pool2"
+  type: POOLING3D
+  bottom: "conv2b"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    kernel_depth: 2
+    stride: 2
+    temporal_stride: 2
+  }
+}
+
+# --------------- 3th layer group --------
+layers {
+  name: "conv3a"
+  type: CONVOLUTION3D
+  bottom: "pool2"
+  top: "conv3a"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  convolution_param {
+    num_output: 32 
+    kernel_size: 3
+    kernel_depth: 3
+    pad: 1
+    temporal_pad: 1
+    stride: 1
+    weight_filler {
+      type: "xavier"
+      #std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      #value: 0 
+    }
+  }
+}
+layers {
+  name: "relu3a"
+  type: RELU
+  bottom: "conv3a"
+  top: "conv3a"
+}
+layers {
+  name: "pool3"
+  type: POOLING3D
+  bottom: "conv3a"
+  top: "pool3"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    kernel_depth: 2
+    stride: 2
+    temporal_stride: 2
+  }
+}
+# ---------------- fc layers -------------
+layers {
+  name: "fc4"
+  type: INNER_PRODUCT
+  bottom: "pool3"
+  top: "fc4"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  inner_product_param {
+    num_output: 256 
+    weight_filler {
+      type: "xavier"
+      #std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      #value: 0 
+    }
+  }
+}
+layers {
+  name: "relu4"
+  type: RELU
+  bottom: "fc4"
+  top: "fc4"
+}
+layers {
+  name: "drop4"
+  type: DROPOUT
+  bottom: "fc4"
+  top: "fc4"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layers {
+  name: "fc5"
+  type: INNER_PRODUCT
+  bottom: "fc4"
+  top: "fc5"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  inner_product_param {
+    num_output: 128 
+    weight_filler {
+      type: "xavier"
+      #std: 0.005
+    }
+    bias_filler {
+      type: "constant"
+      value: 0 
+    }
+  }
+}
+layers {
+  name: "relu5"
+  type: RELU
+  bottom: "fc5"
+  top: "fc5"
+}
+#layers {
+#  name: "drop5"
+#  type: DROPOUT
+#  bottom: "fc5"
+#  top: "fc5"
+#  dropout_param {
+#    dropout_ratio: 0.5
+#  }
+#}
+layers {
+  name: "fc6"
+  type: INNER_PRODUCT
+  bottom: "fc5"
+  top: "fc6"
+  blobs_lr: 1
+  blobs_lr: 2
+  weight_decay: 1
+  weight_decay: 0
+  inner_product_param {
+    num_output: 2  #this is important for regression (set to 1)
+    weight_filler {
+      type: "xavier"
+      #std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      #value: 0
+    }
+  }
+}
+layers {
+  name: "loss"
+  type: SOFTMAX_LOSS
+  bottom: "fc6"
+  bottom: "label"
+  #top: "loss"
+}
